@@ -1,26 +1,670 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!-- index.html -->
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>The Hobby Place</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <script src="{% static 'js/script.js' %}"></script>
-    <!-- Bootstrap CSS desde CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"rel="stylesheet">
-</head>
-<body>
-    <h1>Bienvenido a The Hobby Place</h1>
-    <p>Explora nuestros servicios y disfruta con la mejor experiencia!!.</p>
+{% block title %}The Hobby Place — Logística Aérea y Marítima{% endblock %}
 
-    <img src="{% static 'img/image.png' %}" 
-    alt="Logo">
+{% block extra_css %}
+<style>
+    /* ═══════ TOP BAR — rainbow bottom accent ═══════ */
+    .top-bar{background:#3a1515;color:rgba(255,255,255,.7);font-size:.8rem;padding:8px 0;position:relative;z-index:1001}
+    .top-bar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--rainbow-h)}
+    .top-bar a{color:rgba(255,255,255,.7);text-decoration:none;transition:color .3s}
+    .top-bar a:hover{color:var(--orange)}
+    .top-bar-item{display:inline-flex;align-items:center;gap:6px;margin-right:1.5rem}
+    .top-bar-item:nth-child(1) i{color:var(--coral)}
+    .top-bar-item:nth-child(2) i{color:var(--orange)}
+    .top-bar-item:nth-child(3) i{color:var(--teal)}
+    .top-bar-item i{font-size:.85rem}
+    .top-socials{display:flex;gap:10px}
+    .top-socials a{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:.75rem;transition:all .3s}
+    .top-socials a:nth-child(1):hover{background:var(--coral);color:#fff}
+    .top-socials a:nth-child(2):hover{background:var(--orange);color:#fff}
+    .top-socials a:nth-child(3):hover{background:var(--teal);color:#fff}
+    .top-socials a:nth-child(4):hover{background:var(--green);color:#fff}
 
-    <footer>
-        <p>© 2025 The Hobby Place</p>
-        <a href="{% url 'contacto' %}">Contacto</a>
-    </footer>
-</body>
-</html>
+    /* ═══════ NAVBAR — multicolor hover ═══════ */
+    .navbar-main{background:var(--bg-navbar);padding:0;box-shadow:0 2px 20px var(--shadow-navbar);position:sticky;top:0;z-index:1000;transition:box-shadow .3s,background .35s ease}
+    .navbar-main.scrolled{box-shadow:0 4px 30px var(--shadow-navbar-scroll)}
+    .navbar-inner{display:flex;align-items:center;justify-content:space-between;padding:.6rem 0}
+    .nav-logo{height:55px;transition:transform .3s}
+    .nav-logo:hover{transform:scale(1.04)}
+    .nav-links{display:flex;align-items:center;gap:.3rem;list-style:none;margin:0;padding:0}
+    .nav-links a{font-weight:500;font-size:.92rem;color:var(--text-primary);text-decoration:none;padding:.6rem 1.1rem;border-radius:10px;transition:all .3s}
+    .nav-links li:nth-child(1) a:hover{color:var(--coral);background:rgba(232,89,79,.08)}
+    .nav-links li:nth-child(2) a:hover{color:var(--orange);background:rgba(244,162,60,.08)}
+    .nav-links li:nth-child(3) a:hover{color:var(--green);background:rgba(123,188,93,.08)}
+    .nav-links li:nth-child(4) a:hover{color:var(--teal);background:rgba(60,190,176,.08)}
+    .nav-btn-casillero{background:var(--teal)!important;color:#fff!important;font-weight:600!important;padding:.55rem 1.4rem!important;border-radius:100px!important}
+    .nav-btn-casillero:hover{background:var(--teal-dark)!important;transform:translateY(-2px);box-shadow:0 6px 20px rgba(60,190,176,.3)}
+    .nav-btn-ingresar{background:var(--coral)!important;color:#fff!important;font-weight:600!important;padding:.55rem 1.4rem!important;border-radius:100px!important}
+    .nav-btn-ingresar:hover{background:var(--coral-dark)!important;transform:translateY(-2px);box-shadow:0 6px 20px rgba(232,89,79,.3)}
+    .mobile-toggle{display:none;background:none;border:none;font-size:1.6rem;color:var(--text-primary);cursor:pointer}
+
+    /* ═══════ HERO ═══════ */
+    .hero-section{background:linear-gradient(135deg,#5c1a1a 0%,#7a2020 20%,#6b3012 40%,#3d5c2a 65%,#1d4a3a 85%,#164035 100%);min-height:92vh;display:flex;align-items:center;position:relative;overflow:hidden;padding:4rem 0}
+    html.dark-mode .hero-section{background:linear-gradient(135deg,#1a0808 0%,#2a0e0e 20%,#251508 40%,#142210 65%,#0a1a14 85%,#081410 100%)}
+    .hero-section::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 15% 40%,rgba(232,89,79,.18) 0%,transparent 55%),radial-gradient(ellipse at 85% 60%,rgba(60,190,176,.15) 0%,transparent 55%),radial-gradient(ellipse at 50% 50%,rgba(244,162,60,.08) 0%,transparent 40%);pointer-events:none}
+    .hero-planes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+    .plane{position:absolute;opacity:0}
+    .plane svg{fill:rgba(255,255,255,.85)}
+    .plane-1 svg{width:38px;height:38px}
+    .plane-1{animation:fly1 18s linear infinite}
+    @keyframes fly1{0%{left:-60px;top:60%;opacity:0;transform:rotate(45deg)}4%{opacity:.13}50%{opacity:.1}96%{opacity:.13}100%{left:110%;top:8%;opacity:0;transform:rotate(45deg)}}
+    .plane-2 svg{width:28px;height:28px}
+    .plane-2{animation:fly2 22s linear infinite 2s}
+    @keyframes fly2{0%{left:105%;top:5%;opacity:0;transform:rotate(225deg)}4%{opacity:.11}50%{opacity:.08}96%{opacity:.11}100%{left:-10%;top:88%;opacity:0;transform:rotate(225deg)}}
+    .plane-3 svg{width:46px;height:46px}
+    .plane-3{animation:fly3 20s linear infinite 5s}
+    @keyframes fly3{0%{left:15%;top:110%;opacity:0;transform:rotate(30deg)}4%{opacity:.12}50%{opacity:.09}96%{opacity:.12}100%{left:90%;top:-10%;opacity:0;transform:rotate(30deg)}}
+    .plane-4 svg{width:22px;height:22px}
+    .plane-4{animation:fly4 24s linear infinite 8s}
+    @keyframes fly4{0%{left:30%;top:-50px;opacity:0;transform:rotate(150deg)}4%{opacity:.1}50%{opacity:.07}96%{opacity:.1}100%{left:100%;top:110%;opacity:0;transform:rotate(150deg)}}
+    .plane-5 svg{width:34px;height:34px}
+    .plane-5{animation:fly5 26s linear infinite 11s}
+    @keyframes fly5{0%{left:-60px;top:25%;opacity:0;transform:rotate(90deg)}4%{opacity:.12}50%{opacity:.09}96%{opacity:.12}100%{left:110%;top:35%;opacity:0;transform:rotate(90deg)}}
+    .plane-6 svg{width:26px;height:26px}
+    .plane-6{animation:fly6 21s linear infinite 14s}
+    @keyframes fly6{0%{left:105%;top:95%;opacity:0;transform:rotate(315deg)}4%{opacity:.1}50%{opacity:.07}96%{opacity:.1}100%{left:-10%;top:5%;opacity:0;transform:rotate(315deg)}}
+    .plane-7 svg{width:40px;height:40px}
+    .plane-7{animation:fly7 19s linear infinite 4s}
+    @keyframes fly7{0%{left:108%;top:70%;opacity:0;transform:rotate(295deg)}4%{opacity:.13}50%{opacity:.1}96%{opacity:.13}100%{left:-10%;top:12%;opacity:0;transform:rotate(295deg)}}
+    .plane-8 svg{width:20px;height:20px}
+    .plane-8{animation:fly8 28s linear infinite 7s}
+    @keyframes fly8{0%{left:85%;top:-50px;opacity:0;transform:rotate(210deg)}4%{opacity:.09}50%{opacity:.06}96%{opacity:.09}100%{left:5%;top:110%;opacity:0;transform:rotate(210deg)}}
+    .hero-routes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+    .route-path{stroke-dasharray:10 6;animation:dash-move 3s linear infinite}
+    @keyframes dash-move{to{stroke-dashoffset:-48}}
+    .hero-content-wrap{position:relative;z-index:2}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(232,89,79,.1),rgba(60,190,176,.1));border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:6px 18px;color:var(--orange);font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:2px;margin-bottom:1.5rem;animation:fadeUp .7s ease forwards;opacity:0}
+    .hero-eyebrow .live-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s ease infinite}
+    @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.4}}
+    .hero-title{font-family:'Sora',sans-serif;font-weight:800;font-size:clamp(2.4rem,5.5vw,3.8rem);color:#fff;line-height:1.1;margin-bottom:1.2rem;animation:fadeUp .7s ease .12s forwards;opacity:0}
+    .hero-title .accent-coral{color:var(--coral)}
+    .hero-title .accent-teal{color:var(--teal)}
+    .hero-sub{color:rgba(255,255,255,.55);font-size:1.1rem;font-weight:300;line-height:1.7;max-width:500px;margin-bottom:2.5rem;animation:fadeUp .7s ease .24s forwards;opacity:0}
+
+    /* Tracking box */
+    .tracking-box{background:rgba(255,255,255,.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:2rem;animation:fadeUp .7s ease .36s forwards;opacity:0;position:relative;overflow:hidden}
+    .tracking-box::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--rainbow-h)}
+    .tracking-box h5{font-family:'Sora',sans-serif;font-weight:700;color:#fff;font-size:1.1rem;margin-bottom:1rem}
+    .tracking-box h5 i{color:var(--yellow);margin-right:8px}
+    .tracking-input-group{display:flex;gap:0;border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.2)}
+    .tracking-input-group input{flex:1;border:none;padding:1rem 1.4rem;font-size:1rem;font-family:'Outfit',sans-serif;background:var(--input-bg);color:var(--input-color);outline:none;transition:background .35s,color .35s}
+    .tracking-input-group input::placeholder{color:var(--input-placeholder)}
+    .tracking-input-group input:focus{box-shadow:inset 0 0 0 2px var(--teal)}
+    .tracking-input-group button{background:linear-gradient(135deg,var(--coral),var(--orange));color:#fff;border:none;padding:1rem 2rem;font-family:'Outfit',sans-serif;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:8px;white-space:nowrap}
+    .tracking-input-group button:hover{filter:brightness(1.1);box-shadow:0 4px 15px rgba(232,89,79,.4)}
+    .tracking-hint{color:rgba(255,255,255,.35);font-size:.78rem;margin-top:.8rem}
+    .tracking-hint i{margin-right:4px;color:var(--teal)}
+
+    /* Hero Visual */
+    .hero-visual-card{background:rgba(255,255,255,.04);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:1.8rem;animation:fadeLeft .9s ease .5s forwards;opacity:0}
+    @keyframes fadeLeft{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+    .status-timeline{position:relative;padding-left:28px}
+    .status-timeline::before{content:'';position:absolute;left:8px;top:4px;bottom:4px;width:3px;background:var(--rainbow);border-radius:2px}
+    .timeline-item{position:relative;margin-bottom:1.5rem}
+    .timeline-item:last-child{margin-bottom:0}
+    .timeline-dot{position:absolute;left:-24px;top:2px;width:18px;height:18px;border-radius:50%;border:3px solid}
+    .timeline-item:nth-child(1) .timeline-dot{border-color:var(--coral);background:var(--coral)}
+    .timeline-item:nth-child(2) .timeline-dot{border-color:var(--orange);background:var(--orange)}
+    .timeline-item:nth-child(3) .timeline-dot{border-color:var(--green);background:var(--green)}
+    .timeline-item:nth-child(4) .timeline-dot{border-color:var(--teal);background:var(--teal)}
+    .timeline-item .tl-label{font-size:.72rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+    .timeline-item .tl-title{color:#fff;font-weight:600;font-size:.92rem;margin-top:2px}
+    .timeline-item .tl-desc{color:rgba(255,255,255,.4);font-size:.8rem;margin-top:2px}
+    .hero-mini-stats{display:flex;gap:1rem;margin-top:1.5rem}
+    .mini-stat{flex:1;text-align:center;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:1rem .5rem;position:relative;overflow:hidden}
+    .mini-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+    .mini-stat:nth-child(1)::before{background:var(--coral)}
+    .mini-stat:nth-child(2)::before{background:var(--orange)}
+    .mini-stat:nth-child(3)::before{background:var(--teal)}
+    .mini-stat-val{font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;color:#fff}
+    .mini-stat-lbl{font-size:.68rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ═══════ COLOR DIVIDER ═══════ */
+    .color-divider{height:6px;display:flex}
+    .color-divider span{flex:1;transition:flex .4s ease}
+    .color-divider:hover span:nth-child(odd){flex:1.5}
+
+    /* ═══════ SERVICES ═══════ */
+    .section-services{padding:6rem 0;background:var(--bg-body);position:relative;transition:background .35s ease}
+    .section-services::before{content:'';position:absolute;top:0;left:0;right:0;height:200px;background:linear-gradient(180deg,rgba(255,248,238,.6),transparent);pointer-events:none}
+    html.dark-mode .section-services::before{background:linear-gradient(180deg,rgba(15,15,18,.6),transparent)}
+    .section-tag{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;margin-bottom:.7rem;background:var(--rainbow-h);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .section-heading{font-family:'Sora',sans-serif;font-weight:800;font-size:clamp(1.8rem,3.5vw,2.6rem);color:var(--text-primary);margin-bottom:.8rem;transition:color .35s}
+    .section-sub{color:var(--text-secondary);font-size:1rem;max-width:550px;line-height:1.7;transition:color .35s}
+    .service-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:2.5rem}
+    .service-tab{padding:.7rem 1.6rem;border-radius:100px;border:2px solid transparent;background:var(--bg-soft);font-weight:600;font-size:.88rem;color:var(--text-primary);cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:8px}
+    .service-tab[data-tab="casillero"]:hover,.service-tab[data-tab="casillero"].active{border-color:var(--coral);color:#fff;background:var(--coral);box-shadow:0 6px 20px rgba(232,89,79,.25)}
+    .service-tab[data-tab="aereo"]:hover,.service-tab[data-tab="aereo"].active{border-color:var(--orange);color:#fff;background:var(--orange);box-shadow:0 6px 20px rgba(244,162,60,.25)}
+    .service-tab[data-tab="maritimo"]:hover,.service-tab[data-tab="maritimo"].active{border-color:var(--teal);color:#fff;background:var(--teal);box-shadow:0 6px 20px rgba(60,190,176,.25)}
+    .service-tab[data-tab="delivery"]:hover,.service-tab[data-tab="delivery"].active{border-color:var(--green);color:#fff;background:var(--green);box-shadow:0 6px 20px rgba(123,188,93,.25)}
+    .service-tab[data-tab="asesoria"]:hover,.service-tab[data-tab="asesoria"].active{border-color:var(--yellow);color:#2D2D2D;background:var(--yellow);box-shadow:0 6px 20px rgba(247,214,72,.25)}
+    .tab-content-item{display:none}
+    .tab-content-item.active{display:block;animation:fadeUp .5s ease}
+    .service-visual{border-radius:24px;overflow:hidden;position:relative;height:100%;min-height:320px;display:flex;align-items:center;justify-content:center}
+    .service-visual-icon{font-size:8rem;opacity:.15}
+    #tab-casillero .service-visual{background:linear-gradient(135deg,rgba(232,89,79,.08),rgba(244,162,60,.08))}
+    #tab-aereo .service-visual{background:linear-gradient(135deg,rgba(244,162,60,.08),rgba(247,214,72,.08))}
+    #tab-maritimo .service-visual{background:linear-gradient(135deg,rgba(60,190,176,.08),rgba(123,188,93,.08))}
+    #tab-delivery .service-visual{background:linear-gradient(135deg,rgba(123,188,93,.08),rgba(60,190,176,.08))}
+    #tab-asesoria .service-visual{background:linear-gradient(135deg,rgba(247,214,72,.08),rgba(232,89,79,.08))}
+    html.dark-mode .service-visual{opacity:.9}
+    .service-detail{padding:2rem 0 2rem 2rem}
+    .service-detail h3{font-family:'Sora',sans-serif;font-weight:700;font-size:1.6rem;color:var(--text-primary);margin-bottom:.4rem;transition:color .35s}
+    #tab-casillero .sub-tag{color:var(--coral)}
+    #tab-aereo .sub-tag{color:var(--orange)}
+    #tab-maritimo .sub-tag{color:var(--teal)}
+    #tab-delivery .sub-tag{color:var(--green)}
+    #tab-asesoria .sub-tag{color:var(--yellow-dark)}
+    html.dark-mode #tab-asesoria .sub-tag{color:var(--yellow)}
+    .service-detail .sub-tag{font-size:.85rem;font-weight:600;margin-bottom:1rem}
+    .service-detail p{color:var(--text-secondary);line-height:1.75;font-size:.95rem;margin-bottom:1.5rem;transition:color .35s}
+    .service-features{list-style:none;padding:0;margin:0 0 2rem}
+    .service-features li{display:flex;align-items:center;gap:10px;padding:.5rem 0;font-size:.9rem;color:var(--text-primary);transition:color .35s}
+    #tab-casillero .service-features li i{color:var(--coral)}
+    #tab-aereo .service-features li i{color:var(--orange)}
+    #tab-maritimo .service-features li i{color:var(--teal)}
+    #tab-delivery .service-features li i{color:var(--green)}
+    #tab-asesoria .service-features li i{color:var(--yellow-dark)}
+    html.dark-mode #tab-asesoria .service-features li i{color:var(--yellow)}
+    .service-features li i{font-size:1rem}
+    .btn-service{color:#fff;padding:.75rem 2rem;border-radius:100px;border:none;font-family:'Outfit',sans-serif;font-weight:600;font-size:.9rem;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .btn-service:hover{color:#fff;transform:translateY(-2px)}
+    #tab-casillero .btn-service{background:var(--coral)}#tab-casillero .btn-service:hover{background:var(--coral-dark);box-shadow:0 8px 25px rgba(232,89,79,.3)}
+    #tab-aereo .btn-service{background:var(--orange)}#tab-aereo .btn-service:hover{background:var(--orange-dark);box-shadow:0 8px 25px rgba(244,162,60,.3)}
+    #tab-maritimo .btn-service{background:var(--teal)}#tab-maritimo .btn-service:hover{background:var(--teal-dark);box-shadow:0 8px 25px rgba(60,190,176,.3)}
+    #tab-delivery .btn-service{background:var(--green)}#tab-delivery .btn-service:hover{background:var(--green-dark);box-shadow:0 8px 25px rgba(123,188,93,.3)}
+    #tab-asesoria .btn-service{background:var(--yellow);color:#2D2D2D}#tab-asesoria .btn-service:hover{background:var(--yellow-dark);box-shadow:0 8px 25px rgba(247,214,72,.3)}
+
+    /* ═══════ STATS ═══════ */
+    .stats-banner{background:linear-gradient(135deg,var(--coral) 0%,var(--orange) 25%,var(--yellow) 50%,var(--green) 75%,var(--teal) 100%);padding:3.5rem 0;position:relative;overflow:hidden}
+    .stats-banner::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.15)}
+    html.dark-mode .stats-banner::before{background:rgba(0,0,0,.4)}
+    .stats-banner::after{content:'';position:absolute;width:500px;height:500px;border-radius:50%;background:rgba(255,255,255,.06);top:-250px;right:-100px}
+    .stat-item{text-align:center;position:relative;z-index:1}
+    .stat-val{font-family:'Sora',sans-serif;font-weight:800;font-size:2.8rem;color:#fff;line-height:1;text-shadow:0 2px 10px rgba(0,0,0,.15)}
+    .stat-lbl{font-size:.85rem;color:rgba(255,255,255,.85);margin-top:.4rem}
+
+    /* ═══════ HOW IT WORKS ═══════ */
+    .section-how{padding:6rem 0;background:var(--bg-cream);transition:background .35s}
+    .step-card{text-align:center;padding:2.5rem 1.5rem;position:relative}
+    .step-num{font-family:'Sora',sans-serif;font-weight:900;font-size:4rem;line-height:1;opacity:.06;position:absolute;top:.5rem;left:50%;transform:translateX(-50%)}
+    .step-icon-wrap{width:80px;height:80px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;margin:0 auto 1.2rem;position:relative;z-index:1;box-shadow:0 8px 25px rgba(0,0,0,.1)}
+    .step-card:nth-child(1) .step-icon-wrap{background:linear-gradient(135deg,var(--coral),var(--orange))}
+    .step-card:nth-child(2) .step-icon-wrap{background:linear-gradient(135deg,var(--orange),var(--yellow))}
+    .step-card:nth-child(3) .step-icon-wrap{background:linear-gradient(135deg,var(--green),var(--teal))}
+    .step-card:nth-child(4) .step-icon-wrap{background:linear-gradient(135deg,var(--teal),var(--green))}
+    .step-card h5{font-family:'Sora',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:.5rem}
+    .step-card:nth-child(1) h5{color:var(--coral)}
+    .step-card:nth-child(2) h5{color:var(--orange-dark)}
+    .step-card:nth-child(3) h5{color:var(--green-dark)}
+    .step-card:nth-child(4) h5{color:var(--teal-dark)}
+    html.dark-mode .step-card:nth-child(2) h5{color:var(--orange)}
+    html.dark-mode .step-card:nth-child(3) h5{color:var(--green)}
+    html.dark-mode .step-card:nth-child(4) h5{color:var(--teal)}
+    .step-card p{font-size:.88rem;color:var(--text-secondary);line-height:1.6;transition:color .35s}
+    .step-connector{display:flex;align-items:center;justify-content:center;padding-top:2rem}
+    .step-connector i{font-size:1.5rem;color:var(--orange);opacity:.35}
+
+    /* ═══════ CONTACT ═══════ */
+    .section-contact{padding:6rem 0;background:linear-gradient(135deg,#3a1515 0%,#4a1e1e 35%,#2a3d28 70%,#164035 100%);color:#fff;position:relative;overflow:hidden}
+    html.dark-mode .section-contact{background:linear-gradient(135deg,#110606 0%,#1a0c0c 35%,#0e1a0c 70%,#061812 100%)}
+    .section-contact::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--rainbow-h)}
+    .section-contact .section-tag{color:var(--yellow);-webkit-text-fill-color:var(--yellow)}
+    .section-contact .section-heading{color:#fff}
+    .section-contact .section-sub{color:rgba(255,255,255,.45)}
+    .contact-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:2rem;text-align:center;height:100%;transition:all .3s ease;text-decoration:none;display:block;color:#fff;position:relative;overflow:hidden}
+    .contact-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;opacity:0;transition:opacity .3s}
+    .contact-card:hover{transform:translateY(-6px);box-shadow:0 15px 40px rgba(0,0,0,.2);color:#fff}
+    .contact-card:hover::before{opacity:1}
+    .cc-1:hover{background:rgba(232,89,79,.1);border-color:rgba(232,89,79,.3)}.cc-1::before{background:var(--coral)}
+    .cc-2:hover{background:rgba(244,162,60,.1);border-color:rgba(244,162,60,.3)}.cc-2::before{background:var(--orange)}
+    .cc-3:hover{background:rgba(60,190,176,.1);border-color:rgba(60,190,176,.3)}.cc-3::before{background:var(--teal)}
+    .cc-4:hover{background:rgba(123,188,93,.1);border-color:rgba(123,188,93,.3)}.cc-4::before{background:var(--green)}
+    .contact-icon{width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff;margin:0 auto 1.2rem}
+    .cc-1 .contact-icon{background:linear-gradient(135deg,var(--coral),var(--orange))}
+    .cc-2 .contact-icon{background:linear-gradient(135deg,var(--orange),var(--yellow))}
+    .cc-3 .contact-icon{background:linear-gradient(135deg,var(--teal),var(--green))}
+    .cc-4 .contact-icon{background:linear-gradient(135deg,var(--green),var(--teal))}
+    .contact-card h5{font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.5rem}
+    .contact-card p{color:rgba(255,255,255,.5);font-size:.88rem;line-height:1.6;margin:0}
+
+    /* ═══════ CTA ═══════ */
+    .section-cta{padding:5rem 0;background:var(--bg-body);transition:background .35s}
+    .cta-card{background:linear-gradient(135deg,#3a1515,#5c1a1a,#2a3d28,#1d4a3a);border-radius:28px;padding:4rem;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+    html.dark-mode .cta-card{background:linear-gradient(135deg,#160707,#280d0d,#111c0e,#091812)}
+    .cta-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:var(--rainbow-h)}
+    .cta-card::after{content:'';position:absolute;width:400px;height:400px;border-radius:50%;background:linear-gradient(135deg,var(--coral),var(--teal));opacity:.06;top:-200px;right:-100px}
+    .cta-text{position:relative;z-index:1;max-width:500px}
+    .cta-text h3{font-family:'Sora',sans-serif;font-weight:800;font-size:clamp(1.5rem,3vw,2rem);color:#fff;margin-bottom:.6rem}
+    .cta-text p{color:rgba(255,255,255,.55);font-size:1rem;margin:0}
+    .cta-actions{display:flex;gap:1rem;position:relative;z-index:1;flex-wrap:wrap}
+    .btn-cta-primary{background:linear-gradient(135deg,var(--coral),var(--orange));color:#fff;padding:.9rem 2.2rem;border-radius:100px;border:none;font-family:'Outfit',sans-serif;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .btn-cta-primary:hover{color:#fff;transform:translateY(-3px);box-shadow:0 10px 30px rgba(232,89,79,.4);filter:brightness(1.1)}
+    .btn-cta-secondary{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15);padding:.9rem 2.2rem;border-radius:100px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.95rem;cursor:pointer;transition:all .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .btn-cta-secondary:hover{background:rgba(60,190,176,.15);border-color:var(--teal);color:#fff;transform:translateY(-3px)}
+
+    /* ═══════ FOOTER ═══════ */
+    .footer-main{background:linear-gradient(135deg,#2d1010,#1a3028);color:rgba(255,255,255,.55);padding:4rem 0 1.5rem;position:relative}
+    html.dark-mode .footer-main{background:linear-gradient(135deg,#0c0505,#081208)}
+    .footer-main::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--rainbow-h)}
+    .footer-brand-name{font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;color:#fff;margin-bottom:.8rem}
+    .footer-brand-name .fc{color:var(--coral)}.footer-brand-name .fo{color:var(--orange)}.footer-brand-name .fy{color:var(--yellow)}.footer-brand-name .fg{color:var(--green)}.footer-brand-name .ft{color:var(--teal)}
+    .footer-desc{font-size:.88rem;line-height:1.7;max-width:280px;margin-bottom:1.2rem}
+    .footer-socials{display:flex;gap:.6rem}
+    .footer-social{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);text-decoration:none;transition:all .3s}
+    .footer-social:nth-child(1):hover{background:var(--coral);color:#fff;transform:translateY(-3px)}
+    .footer-social:nth-child(2):hover{background:var(--orange);color:#fff;transform:translateY(-3px)}
+    .footer-social:nth-child(3):hover{background:var(--teal);color:#fff;transform:translateY(-3px)}
+    .footer-social:nth-child(4):hover{background:var(--green);color:#fff;transform:translateY(-3px)}
+    .footer-heading{font-family:'Sora',sans-serif;font-weight:700;font-size:.95rem;color:#fff;margin-bottom:1.2rem;position:relative;padding-bottom:.6rem}
+    .footer-heading::after{content:'';position:absolute;bottom:0;left:0;width:30px;height:3px;border-radius:3px}
+    .footer-col:nth-child(2) .footer-heading::after{background:var(--coral)}
+    .footer-col:nth-child(3) .footer-heading::after{background:var(--orange)}
+    .footer-col:nth-child(4) .footer-heading::after{background:var(--teal)}
+    .footer-list{list-style:none;padding:0;margin:0}
+    .footer-list li{margin-bottom:.6rem}
+    .footer-list a{color:rgba(255,255,255,.45);text-decoration:none;font-size:.88rem;transition:all .3s}
+    .footer-list a:hover{color:var(--orange);padding-left:4px}
+    .footer-contact-line{display:flex;align-items:flex-start;gap:10px;margin-bottom:.8rem;font-size:.88rem}
+    .footer-contact-line:nth-child(1) i{color:var(--coral)}
+    .footer-contact-line:nth-child(2) i{color:var(--orange)}
+    .footer-contact-line:nth-child(3) i{color:var(--teal)}
+    .footer-contact-line:nth-child(4) i{color:var(--green)}
+    .footer-contact-line i{margin-top:3px}
+    .footer-bottom{border-top:1px solid rgba(255,255,255,.07);padding-top:1.5rem;margin-top:3rem;text-align:center;font-size:.8rem;color:rgba(255,255,255,.3)}
+
+    /* ═══════ CURTAIN OVERLAY ═══════ */
+    .curtain-overlay{position:fixed;inset:0;z-index:9999;display:flex;pointer-events:none}
+    .curtain-panel{flex:1;position:relative;transform-origin:top;transition:transform 1s cubic-bezier(.77,0,.18,1)}
+    .curtain-panel:nth-child(1){background:var(--coral);transition-delay:.0s}
+    .curtain-panel:nth-child(2){background:var(--orange);transition-delay:.08s}
+    .curtain-panel:nth-child(3){background:var(--yellow);transition-delay:.16s}
+    .curtain-panel:nth-child(4){background:var(--green);transition-delay:.24s}
+    .curtain-panel:nth-child(5){background:var(--teal);transition-delay:.32s}
+    .curtain-overlay.open .curtain-panel{transform:scaleY(0)}
+    .curtain-logo-wrap{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10000;pointer-events:none;opacity:1;transition:opacity .4s ease .6s}
+    .curtain-logo-wrap.hide{opacity:0}
+    .curtain-logo-wrap img{height:150px;animation:curtainLogoPulse 1.2s ease-in-out infinite alternate}
+    .curtain-loader{display:flex;gap:6px;justify-content:center;margin-top:1rem}
+    .curtain-loader-dot{width:8px;height:8px;border-radius:50%;animation:curtainDotBounce .6s ease-in-out infinite alternate}
+    .curtain-loader-dot:nth-child(1){background:var(--coral);animation-delay:0s}
+    .curtain-loader-dot:nth-child(2){background:var(--yellow);animation-delay:.15s}
+    .curtain-loader-dot:nth-child(3){background:var(--teal);animation-delay:.3s}
+    @keyframes curtainLogoPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(1.06);opacity:1}}
+    @keyframes curtainDotBounce{0%{transform:translateY(0);opacity:.4}100%{transform:translateY(-8px);opacity:1}}
+    body.curtain-active{overflow:hidden}
+
+    /* ═══════ SCROLL REVEAL ═══════ */
+    .reveal{opacity:0;transform:translateY(35px);transition:all .65s cubic-bezier(.22,.61,.36,1)}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+
+    /* ═══════ RESPONSIVE ═══════ */
+    @media(max-width:991px){
+        .nav-links{display:none}
+        .mobile-toggle{display:block}
+        .nav-links.open{display:flex;flex-direction:column;position:absolute;top:100%;left:0;right:0;background:var(--bg-navbar);padding:1rem;box-shadow:0 10px 30px rgba(0,0,0,.1);border-radius:0 0 16px 16px;z-index:999}
+        .service-detail{padding:2rem 0 0 0}
+        .cta-card{padding:2.5rem 1.5rem;text-align:center;justify-content:center}
+        .cta-text{text-align:center}
+        .cta-actions{justify-content:center}
+    }
+    @media(max-width:767px){
+        .top-bar .d-flex{flex-direction:column;gap:6px;text-align:center}
+        .top-socials{justify-content:center}
+        .hero-section{min-height:auto;padding:3rem 0}
+        .hero-mini-stats{flex-wrap:wrap}
+        .mini-stat{min-width:calc(50% - .5rem)}
+        .step-connector{display:none}
+    }
+</style>
+{% endblock %}
+
+{% block navbar %}
+<!-- CURTAIN OVERLAY -->
+<div class="curtain-overlay" id="curtainOverlay">
+    <div class="curtain-panel"></div><div class="curtain-panel"></div><div class="curtain-panel"></div><div class="curtain-panel"></div><div class="curtain-panel"></div>
+</div>
+<div class="curtain-logo-wrap" id="curtainLogo">
+    <img src="{% static 'img/logo.png' %}" alt="The Hobby Place">
+    <div class="curtain-loader"><div class="curtain-loader-dot"></div><div class="curtain-loader-dot"></div><div class="curtain-loader-dot"></div></div>
+</div>
+
+<!-- TOP BAR -->
+<div class="top-bar d-none d-md-block">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <span class="top-bar-item"><i class="bi bi-telephone-fill"></i><a href="tel:+50672310583"> Servicio al Cliente: +506-7231-0583</a></span>
+                <span class="top-bar-item"><i class="bi bi-envelope-fill"></i><a href="mailto:info@thehobbyplace.com">info@thehobbyplace.com</a></span>
+                <span class="top-bar-item"><i class="bi bi-geo-alt-fill"></i><a href="#">Cartago, Tres Rios, Concepción, Costa Rica</a></span>
+            </div>
+            <div class="top-socials">
+                <a href="#"><i class="bi bi-facebook"></i></a>
+                <a href="#"><i class="bi bi-instagram"></i></a>
+                <a href="#"><i class="bi bi-linkedin"></i></a>
+                <a href="#"><i class="bi bi-whatsapp"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar-main">
+    <div class="container">
+        <div class="navbar-inner">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'img/logo.png' %}" alt="The Hobby Place" class="nav-logo">
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#track">Tracking</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#como-funciona">¿Cómo Funciona?</a></li>
+                <li><a href="#contacto">Contáctenos</a></li>
+                <li><a href="#" class="nav-btn-casillero">Crear Casillero</a></li>
+                <li><a href="#" class="nav-btn-ingresar">Ingresar</a></li>
+                <li>
+                    <button class="theme-toggle" aria-label="Alternar modo oscuro">
+                        <i class="bi bi-sun-fill icon-sun"></i>
+                        <i class="bi bi-moon-fill icon-moon"></i>
+                    </button>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center gap-2 d-lg-none">
+                <button class="theme-toggle" aria-label="Alternar modo oscuro">
+                    <i class="bi bi-sun-fill icon-sun"></i>
+                    <i class="bi bi-moon-fill icon-moon"></i>
+                </button>
+                <button class="mobile-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+                    <i class="bi bi-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<!-- HERO + TRACKING -->
+<section class="hero-section" id="track">
+    <div class="hero-planes">
+        <div class="plane plane-1"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+        <div class="plane plane-2"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+        <div class="plane plane-3"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+        <div class="plane plane-4"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+        <div class="plane plane-5"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+        <div class="plane plane-6"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+        <div class="plane plane-7"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+        <div class="plane plane-8"><svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+    </div>
+    <svg class="hero-routes" viewBox="0 0 1400 700" preserveAspectRatio="none">
+        <path class="route-path" d="M 0 400 Q 350 100 700 350 Q 1050 600 1400 250" stroke="rgba(255,255,255,.1)" stroke-width="2" fill="none"/>
+        <path class="route-path" d="M 0 550 Q 400 300 800 500 Q 1100 650 1400 400" stroke="rgba(255,255,255,.07)" stroke-width="1.5" fill="none" style="animation-delay:1s"/>
+        <path class="route-path" d="M 0 200 Q 300 500 600 200 Q 900 50 1400 350" stroke="rgba(255,255,255,.05)" stroke-width="1.5" fill="none" style="animation-delay:2s"/>
+    </svg>
+    <div class="container hero-content-wrap">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="hero-eyebrow"><span class="live-dot"></span>Rastreo en Tiempo Real</div>
+                <h1 class="hero-title">Sigue tus <span class="accent-coral">paquetes</span> hacia cualquier <span class="accent-teal">destino</span></h1>
+                <p class="hero-sub">Ingresa tu número de rastreo y obtén actualizaciones en tiempo real sobre el estado y ubicación de tu carga aérea o marítima.</p>
+                <div class="tracking-box" id="trackingBox">
+                    <h5><i class="bi bi-search"></i> Rastrear Envío</h5>
+                    <div class="tracking-input-group">
+                        <input type="text" placeholder="Ingresa tu número de tracking..." id="trackingInput">
+                        <button onclick="trackPackage()"><i class="bi bi-box-seam"></i> Rastrear</button>
+                    </div>
+                    <div class="tracking-hint"><i class="bi bi-info-circle"></i> Ejemplo: THP-2025-00123 o número de guía</div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual-card">
+                    <h6 style="color:rgba(255,255,255,.4);font-size:.72rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:1.2rem;font-weight:600"><i class="bi bi-broadcast" style="color:var(--green);margin-right:6px"></i>Estado del Envío — THP-2025-00847</h6>
+                    <div class="status-timeline">
+                        <div class="timeline-item"><div class="timeline-dot"></div><div class="tl-label">15 Mar 2025 — 08:30 AM</div><div class="tl-title">Recogida Confirmada</div><div class="tl-desc">Bodega Miami, FL — USA</div></div>
+                        <div class="timeline-item"><div class="timeline-dot"></div><div class="tl-label">16 Mar 2025 — 02:15 PM</div><div class="tl-title">En Tránsito Aéreo</div><div class="tl-desc">Vuelo AA-1247 — Miami → San José</div></div>
+                        <div class="timeline-item"><div class="timeline-dot"></div><div class="tl-label">17 Mar 2025 — 10:00 AM</div><div class="tl-title">Proceso Aduanero</div><div class="tl-desc">Desaduanaje en progreso...</div></div>
+                        <div class="timeline-item"><div class="timeline-dot"></div><div class="tl-label">Estimado: 18 Mar 2025</div><div class="tl-title">Entrega a Domicilio</div><div class="tl-desc">San José, Costa Rica</div></div>
+                    </div>
+                    <div class="hero-mini-stats">
+                        <div class="mini-stat"><div class="mini-stat-val">150+</div><div class="mini-stat-lbl">Destinos</div></div>
+                        <div class="mini-stat"><div class="mini-stat-val">24/7</div><div class="mini-stat-lbl">Soporte</div></div>
+                        <div class="mini-stat"><div class="mini-stat-val">98%</div><div class="mini-stat-lbl">A Tiempo</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- COLOR DIVIDER -->
+<div class="color-divider">
+    <span style="background:var(--coral)"></span><span style="background:var(--orange)"></span><span style="background:var(--yellow)"></span><span style="background:var(--green)"></span><span style="background:var(--teal)"></span>
+</div>
+
+<!-- SERVICES -->
+<section class="section-services" id="servicios">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <div class="section-tag">Nuestros Servicios</div>
+            <h2 class="section-heading">Todo lo que necesitas para mover tu carga</h2>
+            <p class="section-sub mx-auto">Soluciones integrales de logística aérea y marítima con casillero gratuito, delivery y asesoría personalizada.</p>
+        </div>
+        <div class="service-tabs justify-content-center reveal">
+            <div class="service-tab active" data-tab="casillero"><i class="bi bi-mailbox2"></i> Casillero Gratuito</div>
+            <div class="service-tab" data-tab="aereo"><i class="bi bi-airplane"></i> Envíos Aéreos</div>
+            <div class="service-tab" data-tab="maritimo"><i class="bi bi-water"></i> Carga Marítima</div>
+            <div class="service-tab" data-tab="delivery"><i class="bi bi-truck"></i> Delivery</div>
+            <div class="service-tab" data-tab="asesoria"><i class="bi bi-headset"></i> Asesoramiento</div>
+        </div>
+
+        <div class="tab-content-item active" id="tab-casillero">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-5 reveal"><div class="service-visual"><i class="bi bi-mailbox2-flag service-visual-icon" style="color:var(--coral)"></i></div></div>
+                <div class="col-lg-7 reveal"><div class="service-detail">
+                    <h3>Casillero Gratuito</h3>
+                    <div class="sub-tag">Su dirección directa en Miami</div>
+                    <p>Compre en cualquier tienda en línea de Estados Unidos y reciba sus paquetes en Costa Rica. Le asignamos una dirección física en Miami completamente gratis.</p>
+                    <ul class="service-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Dirección personal en Miami, FL</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Sin costo de membresía ni mensualidad</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Rastreo en tiempo real de cada paquete</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Consolidación de múltiples paquetes</li>
+                    </ul>
+                    <a href="#" class="btn-service">Crear Mi Casillero <i class="bi bi-arrow-right"></i></a>
+                </div></div>
+            </div>
+        </div>
+        <div class="tab-content-item" id="tab-aereo">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-5 reveal"><div class="service-visual"><i class="bi bi-airplane-engines service-visual-icon" style="color:var(--orange)"></i></div></div>
+                <div class="col-lg-7 reveal"><div class="service-detail">
+                    <h3>Envíos Aéreos</h3>
+                    <div class="sub-tag">Rápido, seguro y confiable</div>
+                    <p>Transporte aéreo express para mercancía urgente o de alto valor. Tiempos de tránsito de 48-72 horas con seguimiento puerta a puerta.</p>
+                    <ul class="service-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Entrega express en 48-72 horas</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Seguro incluido en cada envío</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Gestión aduanera completa</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Carga general y especializada</li>
+                    </ul>
+                    <a href="{% url 'contacto' %}" class="btn-service">Cotizar Envío <i class="bi bi-arrow-right"></i></a>
+                </div></div>
+            </div>
+        </div>
+        <div class="tab-content-item" id="tab-maritimo">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-5 reveal"><div class="service-visual"><i class="bi bi-water service-visual-icon" style="color:var(--teal)"></i></div></div>
+                <div class="col-lg-7 reveal"><div class="service-detail">
+                    <h3>Carga Marítima</h3>
+                    <div class="sub-tag">FCL & LCL — Volumen sin límites</div>
+                    <p>Contenedores completos o consolidados para grandes volúmenes. La opción más económica para importaciones y exportaciones regulares.</p>
+                    <ul class="service-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Contenedor completo (FCL) desde 20'</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Carga consolidada (LCL) desde 1 m³</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Rutas a más de 150 destinos</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Desaduanaje y documentación incluida</li>
+                    </ul>
+                    <a href="{% url 'contacto' %}" class="btn-service">Solicitar Cotización <i class="bi bi-arrow-right"></i></a>
+                </div></div>
+            </div>
+        </div>
+        <div class="tab-content-item" id="tab-delivery">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-5 reveal"><div class="service-visual"><i class="bi bi-truck service-visual-icon" style="color:var(--green)"></i></div></div>
+                <div class="col-lg-7 reveal"><div class="service-detail">
+                    <h3>Delivery</h3>
+                    <div class="sub-tag">Servicio puerta a puerta</div>
+                    <p>Llevamos sus paquetes directamente a su oficina o casa. Sin necesidad de recoger en bodega ni hacer filas.</p>
+                    <ul class="service-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Entrega a domicilio u oficina</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Cobertura en todo el GAM</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Horarios flexibles de entrega</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Notificación previa por WhatsApp</li>
+                    </ul>
+                    <a href="{% url 'contacto' %}" class="btn-service">Coordinar Entrega <i class="bi bi-arrow-right"></i></a>
+                </div></div>
+            </div>
+        </div>
+        <div class="tab-content-item" id="tab-asesoria">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-5 reveal"><div class="service-visual"><i class="bi bi-headset service-visual-icon" style="color:var(--yellow-dark)"></i></div></div>
+                <div class="col-lg-7 reveal"><div class="service-detail">
+                    <h3>Asesoramiento</h3>
+                    <div class="sub-tag">Le ayudamos con sus compras</div>
+                    <p>Servicio de courier para emprendedores. Le asesoramos en compras en línea, consolidación y optimización de costos logísticos.</p>
+                    <ul class="service-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Asesoría personalizada en importaciones</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Compras asistidas en tiempo real</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Clasificación arancelaria</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Optimización de costos de envío</li>
+                    </ul>
+                    <a href="{% url 'contacto' %}" class="btn-service">Hablar con un Asesor <i class="bi bi-arrow-right"></i></a>
+                </div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-banner">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-6 col-md-3 reveal"><div class="stat-item"><div class="stat-val">15+</div><div class="stat-lbl">Años de Experiencia</div></div></div>
+            <div class="col-6 col-md-3 reveal"><div class="stat-item"><div class="stat-val">2,000+</div><div class="stat-lbl">Clientes Satisfechos</div></div></div>
+            <div class="col-6 col-md-3 reveal"><div class="stat-item"><div class="stat-val">150+</div><div class="stat-lbl">Destinos Globales</div></div></div>
+            <div class="col-6 col-md-3 reveal"><div class="stat-item"><div class="stat-val">50K</div><div class="stat-lbl">Envíos al Año</div></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section-how" id="como-funciona">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <div class="section-tag">¿Cómo Funciona?</div>
+            <h2 class="section-heading">Tu envío en 4 simples pasos</h2>
+            <p class="section-sub mx-auto">Hemos simplificado todo el proceso para que mover tu carga sea rápido y sin complicaciones.</p>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-6 col-lg-2 reveal"><div class="step-card"><div class="step-num">01</div><div class="step-icon-wrap"><i class="bi bi-person-plus-fill"></i></div><h5>Regístrate</h5><p>Crea tu casillero gratis en menos de 2 minutos.</p></div></div>
+            <div class="col-6 col-lg-1 d-none d-lg-flex step-connector"><i class="bi bi-chevron-right"></i></div>
+            <div class="col-6 col-lg-2 reveal"><div class="step-card"><div class="step-num">02</div><div class="step-icon-wrap"><i class="bi bi-cart-check-fill"></i></div><h5>Compra</h5><p>Usa tu dirección de Miami para tus compras en línea.</p></div></div>
+            <div class="col-6 col-lg-1 d-none d-lg-flex step-connector"><i class="bi bi-chevron-right"></i></div>
+            <div class="col-6 col-lg-2 reveal"><div class="step-card"><div class="step-num">03</div><div class="step-icon-wrap"><i class="bi bi-geo-alt-fill"></i></div><h5>Rastreá</h5><p>Seguí tu paquete en tiempo real hasta Costa Rica.</p></div></div>
+            <div class="col-6 col-lg-1 d-none d-lg-flex step-connector"><i class="bi bi-chevron-right"></i></div>
+            <div class="col-6 col-lg-2 reveal"><div class="step-card"><div class="step-num">04</div><div class="step-icon-wrap"><i class="bi bi-house-check-fill"></i></div><h5>Recibí</h5><p>Te lo llevamos a tu casa u oficina.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section-contact" id="contacto">
+    <div class="container">
+        <div class="text-center mb-5 reveal">
+            <div class="section-tag">Contáctenos</div>
+            <h2 class="section-heading">Estamos aquí para ayudarte</h2>
+            <p class="section-sub mx-auto">Nuestro equipo está disponible para resolver cualquier duda sobre tus envíos.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3 reveal"><a href="#" target="_blank" class="contact-card cc-1"><div class="contact-icon"><i class="bi bi-geo-alt-fill"></i></div><h5>Dirección</h5><p>Cartago, Tres Rios, Concepción, Costa Rica</p></a></div>
+            <div class="col-md-6 col-lg-3 reveal"><a href="tel:+50672310583" class="contact-card cc-2"><div class="contact-icon"><i class="bi bi-telephone-fill"></i></div><h5>Teléfonos</h5><p>+506-7231-0583</p></a></div>
+            <div class="col-md-6 col-lg-3 reveal"><a href="mailto:info@thehobbyplace.com" class="contact-card cc-3"><div class="contact-icon"><i class="bi bi-envelope-fill"></i></div><h5>Correo</h5><p>info@thehobbyplace.com</p></a></div>
+            <div class="col-md-6 col-lg-3 reveal"><div class="contact-card cc-4"><div class="contact-icon"><i class="bi bi-clock-fill"></i></div><h5>Horario</h5><p>Lun - Vie: 9:00am a 6:00pm<br>Sáb: 9:00am a 12:00md</p></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="section-cta">
+    <div class="container">
+        <div class="cta-card reveal">
+            <div class="cta-text">
+                <h3>¿Listo para empezar a recibir tus paquetes?</h3>
+                <p>Crea tu casillero gratuito hoy y comienza a comprar en Estados Unidos sin límites.</p>
+            </div>
+            <div class="cta-actions">
+                <a href="#" class="btn-cta-primary">Crear Casillero Gratis <i class="bi bi-arrow-right"></i></a>
+                <a href="{% url 'contacto' %}" class="btn-cta-secondary">Contáctenos <i class="bi bi-chat-dots"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+<footer class="footer-main">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4 footer-col">
+                <div class="footer-brand-name"><span class="fc">T</span><span class="fo">h</span><span class="fy">e</span> <span class="fg">H</span><span class="ft">o</span><span class="fc">b</span><span class="fo">b</span><span class="fy">y</span> <span class="fg">P</span><span class="ft">l</span><span class="fc">a</span><span class="fo">c</span><span class="fy">e</span></div>
+                <p class="footer-desc">Soluciones logísticas aéreas y marítimas que conectan su negocio con el mundo.</p>
+                <div class="footer-socials">
+                    <a href="#" class="footer-social"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="footer-social"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="footer-social"><i class="bi bi-linkedin"></i></a>
+                    <a href="#" class="footer-social"><i class="bi bi-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="col-6 col-lg-2 footer-col">
+                <h6 class="footer-heading">Servicios</h6>
+                <ul class="footer-list"><li><a href="#">Casillero</a></li><li><a href="#">Carga Aérea</a></li><li><a href="#">Carga Marítima</a></li><li><a href="#">Delivery</a></li><li><a href="#">Asesoría</a></li></ul>
+            </div>
+            <div class="col-6 col-lg-2 footer-col">
+                <h6 class="footer-heading">Empresa</h6>
+                <ul class="footer-list"><li><a href="{% url 'home' %}">Inicio</a></li><li><a href="#">Nosotros</a></li><li><a href="#">Rastreo</a></li><li><a href="{% url 'contacto' %}">Contacto</a></li><li><a href="#">Ingresar</a></li></ul>
+            </div>
+            <div class="col-lg-4 footer-col">
+                <h6 class="footer-heading">Contacto</h6>
+                <div class="footer-contact-line"><i class="bi bi-geo-alt-fill"></i><span>Cartago, Tres Rios, Concepción, Costa Rica</span></div>
+                <div class="footer-contact-line"><i class="bi bi-telephone-fill"></i><span>Servicio al Cliente: +506-7231-0583</span></div>
+                <div class="footer-contact-line"><i class="bi bi-envelope-fill"></i><span>info@thehobbyplace.com</span></div>
+                <div class="footer-contact-line"><i class="bi bi-clock-fill"></i><span>Lun - Vie: 9:00am a 6:00pm</span></div>
+            </div>
+        </div>
+        <div class="footer-bottom">© 2025 The Hobby Place. Todos los derechos reservados.</div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Curtain
+    document.body.classList.add('curtain-active');
+    window.addEventListener('load',function(){var c=document.getElementById('curtainOverlay'),l=document.getElementById('curtainLogo');setTimeout(function(){l.classList.add('hide')},800);setTimeout(function(){c.classList.add('open');document.body.classList.remove('curtain-active')},1200);setTimeout(function(){c.style.display='none';l.style.display='none'},2600)});
+    // Scroll
+    window.addEventListener('scroll',function(){document.querySelector('.navbar-main').classList.toggle('scrolled',window.scrollY>30)});
+    // Reveal
+    var revealObs=new IntersectionObserver(function(entries){entries.forEach(function(entry,i){if(entry.isIntersecting){setTimeout(function(){entry.target.classList.add('visible')},i*80)}})},{threshold:.1});
+    document.querySelectorAll('.reveal').forEach(function(el){revealObs.observe(el)});
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){var href=this.getAttribute('href');if(href==='#')return;e.preventDefault();var t=document.querySelector(href);if(t){t.scrollIntoView({behavior:'smooth',block:'start'});var nav=document.getElementById('navLinks');if(nav)nav.classList.remove('open')}})});
+    // Tabs
+    document.querySelectorAll('.service-tab').forEach(function(tab){tab.addEventListener('click',function(){document.querySelectorAll('.service-tab').forEach(function(t){t.classList.remove('active')});document.querySelectorAll('.tab-content-item').forEach(function(c){c.classList.remove('active')});tab.classList.add('active');var target=document.getElementById('tab-'+tab.dataset.tab);if(target){target.classList.add('active');target.querySelectorAll('.reveal').forEach(function(el){el.classList.remove('visible');setTimeout(function(){el.classList.add('visible')},100)})}})});
+    // Track
+    function trackPackage(){var input=document.getElementById('trackingInput');var val=input.value.trim();if(val){alert('Buscando envío: '+val+'\n\nEsta funcionalidad se conectará con tu backend Django.')}else{input.focus();input.style.boxShadow='0 0 0 3px rgba(232,89,79,.3)';setTimeout(function(){input.style.boxShadow=''},1500)}}
+    document.getElementById('trackingInput').addEventListener('keypress',function(e){if(e.key==='Enter')trackPackage()});
+</script>
+{% endblock %}

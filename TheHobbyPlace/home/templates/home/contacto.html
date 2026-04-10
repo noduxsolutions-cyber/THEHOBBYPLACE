@@ -1,17 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
 <!-- contacto.html -->
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Contacto - The Hobby Place</title>
-</head>
-<body>
-    <h1>Contacto</h1>
-    <p>Envía un correo a contacto@thehobbyplace.com</p>
+{% block title %}Contacto - The Hobby Place{% endblock %}
 
-    <footer>
-        <p>© 2025 The Hobby Place</p>
-        <a href="{% url 'home' %}">Inicio</a>
-    </footer>
-</body>
-</html>
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-body">Contacto</h1>
+    <p class="text-body">Envía un correo a <a
+    href="mailto:contacto@thehobbyplace.com"
+    class="text-body">contacto@thehobbyplace.com</a>
+    </p>
+
+    <div class="alert alert-primary">Estamos disponibles de
+    lunes a viernes de 9:00am a 6:00pm.</div>
+    <div class="alert alert-warning">El tiempo de respuesta
+    puede variar según la demanda.</div>
+    <div class="alert alert-danger">No envíes información
+    sensible por este formulario.</div>
+</div>
+{% endblock %}

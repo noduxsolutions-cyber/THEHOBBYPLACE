@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}The Hobby Place{% endblock %}</title>
+
+    <!-- Prevent flash: apply saved theme before paint -->
+    <script>
+        (function(){
+            var d = localStorage.getItem('thp-theme');
+            if(d === 'dark' || (!d && window.matchMedia('(prefers-color-scheme:dark)').matches)){
+                document.documentElement.classList.add('dark-mode');
+            }
+        })();
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        /* ═══════════════════════════════════════════
+           GLOBAL THEME VARIABLES
+           ═══════════════════════════════════════════ */
+        :root{
+            /* Brand palette (always available) */
+            --coral:#E8594F;--coral-dark:#d44a40;
+            --orange:#F4A23C;--orange-dark:#e0912e;
+            --yellow:#F7D648;--yellow-dark:#e5c530;
+            --green:#7CBC5D;--green-dark:#6aaa4b;
+            --teal:#3CBEB0;--teal-dark:#33a99d;
+            --rainbow:linear-gradient(135deg,var(--coral),var(--orange),var(--yellow),var(--green),var(--teal));
+            --rainbow-h:linear-gradient(90deg,var(--coral),var(--orange),var(--yellow),var(--green),var(--teal));
+
+            /* Light mode (default) */
+            --bg-body:#FEFCF9;
+            --bg-card:#fff;
+            --bg-card-hover:#f9f7f4;
+            --bg-navbar:#fff;
+            --bg-soft:#F5F3F0;
+            --bg-cream:#FFF8EE;
+            --text-primary:#2D2D2D;
+            --text-secondary:#8a8a8a;
+            --text-inverse:#fff;
+            --shadow-navbar:rgba(0,0,0,.04);
+            --shadow-navbar-scroll:rgba(0,0,0,.08);
+            --border-light:rgba(0,0,0,.06);
+            --input-bg:#fff;
+            --input-color:#2D2D2D;
+            --input-placeholder:#bbb;
+        }
+
+        html.dark-mode{
+            --bg-body:#0f0f12;
+            --bg-card:#1a1a1f;
+            --bg-card-hover:#222228;
+            --bg-navbar:#141418;
+            --bg-soft:#18181d;
+            --bg-cream:#131316;
+            --text-primary:#e8e8ec;
+            --text-secondary:#8e8e96;
+            --text-inverse:#fff;
+            --shadow-navbar:rgba(0,0,0,.3);
+            --shadow-navbar-scroll:rgba(0,0,0,.45);
+            --border-light:rgba(255,255,255,.07);
+            --input-bg:#1e1e24;
+            --input-color:#e8e8ec;
+            --input-placeholder:#555;
+        }
+
+        /* ═══════ BASE RESETS ═══════ */
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            font-family:'Outfit',sans-serif;
+            background:var(--bg-body);
+            color:var(--text-primary);
+            overflow-x:hidden;
+            transition:background .35s ease,color .35s ease;
+        }
+
+        /* ═══════ DARK MODE TOGGLE BTN ═══════ */
+        .theme-toggle{
+            position:relative;width:40px;height:40px;border-radius:12px;border:1px solid var(--border-light);
+            background:var(--bg-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;
+            font-size:1.15rem;color:var(--text-primary);transition:all .3s ease;margin-left:.6rem;
+        }
+        .theme-toggle:hover{
+            border-color:var(--orange);color:var(--orange);
+            box-shadow:0 0 16px rgba(244,162,60,.15);transform:translateY(-1px);
+        }
+        .theme-toggle .icon-sun,
+        .theme-toggle .icon-moon{
+            position:absolute;transition:opacity .3s ease,transform .4s cubic-bezier(.68,-.55,.27,1.55);
+        }
+        .theme-toggle .icon-sun{opacity:1;transform:rotate(0deg)}
+        .theme-toggle .icon-moon{opacity:0;transform:rotate(-90deg) scale(.5)}
+        html.dark-mode .theme-toggle .icon-sun{opacity:0;transform:rotate(90deg) scale(.5)}
+        html.dark-mode .theme-toggle .icon-moon{opacity:1;transform:rotate(0deg) scale(1)}
+
+        /* ═══════ SIMPLE BASE FOOTER ═══════ */
+        .base-footer{
+            text-align:center;margin-top:3rem;padding:1.5rem 0;
+            border-top:1px solid var(--border-light);
+            color:var(--text-secondary);font-size:.88rem;
+            transition:border-color .35s,color .35s;
+        }
+        .base-footer a{
+            color:var(--text-primary);text-decoration:none;transition:color .3s;
+        }
+        .base-footer a:hover{color:var(--orange)}
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ═══════ NAVBAR (overridable via block) ═══════ -->
+    {% block navbar %}
+    <nav style="background:var(--bg-navbar);box-shadow:0 2px 20px var(--shadow-navbar);padding:.8rem 0;position:sticky;top:0;z-index:1000;transition:background .35s,box-shadow .35s">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="{% url 'home' %}" style="text-decoration:none;display:flex;align-items:center;gap:.5rem">
+                <span style="font-family:'Sora',sans-serif;font-weight:800;font-size:1.2rem">
+                    <span style="color:var(--coral)">The</span>
+                    <span style="color:var(--orange)">Hobby</span>
+                    <span style="color:var(--teal)">Place</span>
+                </span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{% url 'home' %}" style="color:var(--text-primary);text-decoration:none;padding:.4rem .8rem;font-size:.9rem;font-weight:500;border-radius:8px;transition:all .3s">Inicio</a>
+                <a href="{% url 'contacto' %}" style="color:var(--text-primary);text-decoration:none;padding:.4rem .8rem;font-size:.9rem;font-weight:500;border-radius:8px;transition:all .3s">Contacto</a>
+                <button class="theme-toggle" aria-label="Alternar modo oscuro">
+                    <i class="bi bi-sun-fill icon-sun"></i>
+                    <i class="bi bi-moon-fill icon-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    {% endblock %}
+
+    {% block content %}
+    {% endblock %}
+
+    {% block footer %}
+    <footer class="base-footer">
+        <p>&copy; 2025 The Hobby Place</p>
+        <a href="{% url 'home' %}">Inicio</a>
+        <a href="{% url 'contacto' %}" class="ms-3">Contacto</a>
+    </footer>
+    {% endblock %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ═══════ DARK MODE TOGGLE (global) ═══════
+        function thpToggleTheme(){
+            document.documentElement.classList.toggle('dark-mode');
+            var isDark = document.documentElement.classList.contains('dark-mode');
+            localStorage.setItem('thp-theme', isDark ? 'dark' : 'light');
+        }
+        document.querySelectorAll('.theme-toggle').forEach(function(btn){
+            btn.addEventListener('click', thpToggleTheme);
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
